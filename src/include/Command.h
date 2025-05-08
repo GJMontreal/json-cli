@@ -8,6 +8,7 @@
 template<typename Derived, typename T>
 class Command{
   public:
+    using ArgType = T;
     void operator()(const T& t) const{
       static_cast<const Derived&>(*this).execute(t);
     }
@@ -27,5 +28,14 @@ class HelpCommand : public Command<HelpCommand, nlohmann::json> {
             std::cout << "Hello, " << arg << "!\n";
         }
     };
+
+    class AnotherCommand : public Command<AnotherCommand, int> {
+      public:
+          static constexpr const char* name = "test";
+      
+          void execute(const int& arg) const {
+              std::cout << "test, " << arg << "!\n";
+          }
+      };
 
 #endif

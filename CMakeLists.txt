@@ -30,6 +30,7 @@ target_sources(json_reader PUBLIC
   ./main.cpp
   ./src/InputHandler.cpp
   ./src/Command.cpp
+  # ./src/CommandDispatcher.cpp
 )
 
 # set(PICO_CXX_ENABLE_EXCEPTIONS 1)
