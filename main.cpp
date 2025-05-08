@@ -6,12 +6,16 @@
 #include <nlohmann/json.hpp>
 
 #include "InputHandler.h"
+#include "CommandDispatcher.hpp"
 
 int main() {
     stdio_init_all();
 
     std::cout << "initializing cli" << std::endl;
 
+    CommandDispatcher<GreetCommand,HelpCommand> dispatcher;
+    nlohmann::json empty;
+    dispatcher.dispatch("help",empty);
     InputHandler input_handler;
 
     while(1){
@@ -21,6 +25,8 @@ int main() {
 
         if(input_handler.handle(c, json)){ 
           std::cout << json.dump(4) << std::endl;
+          std::string top_command = json.begin().key();
+          dispatcher.dispatch(top_command,json);
         }
       }
     }

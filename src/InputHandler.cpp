@@ -27,7 +27,7 @@ bool InputHandler::handle(char c, json &j) {
     if (brace_count() == 0) {
       started = false;
       j = json::parse(json_stream.str(), nullptr, false);
-      return !j.is_discarded();  // we're not using exceptions so it will never be empty
+      return !(j.is_discarded() || j.empty());  // we're not using exceptions so it will never be empty
     }
   }
   return false;

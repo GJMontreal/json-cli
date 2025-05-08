@@ -1,21 +1,31 @@
 #ifndef INCLUDE_COMMAND_HPP
 #define INCLUDE_COMMAND_HPP
 
-#include <any>
+
 #include <string>
 #include <iostream>
-
-template<typename T>
+#include <nlohmann/json.hpp>
+template<typename Derived, typename T>
 class Command{
   public:
-    virtual ~Command() = default;
-    virtual std::string name() const = 0;
-    virtual void execute(std::any arg) const = 0;
+    void operator()(const T& t) const{
+      static_cast<const Derived&>(*this).execute(t);
+    }
 };
 
-class HelpCommand : public Command {
+class HelpCommand : public Command<HelpCommand, nlohmann::json> {
   public:
-      std::string name() const override { return "help"; }
-      void execute(std::any arg) const override;
+    static constexpr const char* name = "help";
+    void execute(const nlohmann::json json) const;
   };
+
+  class GreetCommand : public Command<GreetCommand, std::string> {
+    public:
+        static constexpr const char* name = "greet";
+    
+        void execute(const std::string& arg) const {
+            std::cout << "Hello, " << arg << "!\n";
+        }
+    };
+
 #endif
