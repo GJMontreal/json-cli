@@ -11,8 +11,8 @@ class InputHandler {
           return _brace_count;
         }
   
-        void handle(char c, nlohmann::json &json );
-        
+        bool handle(char c, nlohmann::json &json );
+
     private:
       std::atomic<int> _brace_count = 0;
       bool started = false;

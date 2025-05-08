@@ -18,10 +18,9 @@ int main() {
       char c = getchar_timeout_us(0);
       if(c != char(PICO_ERROR_TIMEOUT)){
         nlohmann::json json;
-        
-        input_handler.handle(c, json);  
-        if(!json.empty()){
-          std::cout << "Parsed JSON: \n" << json.dump(4) << std::endl;
+
+        if(input_handler.handle(c, json)){ 
+          std::cout << json.dump(4) << std::endl;
         }
       }
     }

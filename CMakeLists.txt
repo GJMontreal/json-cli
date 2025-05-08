@@ -29,9 +29,10 @@ add_executable(json_reader)
 target_sources(json_reader PUBLIC
   ./main.cpp
   ./src/InputHandler.cpp
+  ./src/Command.cpp
 )
 
-set(PICO_CXX_ENABLE_EXCEPTIONS 1)
+# set(PICO_CXX_ENABLE_EXCEPTIONS 1)
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
