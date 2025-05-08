@@ -9,6 +9,23 @@
 #include "InputHandler.h"
 #include "CommandDispatcher.hpp"
 
+using json = nlohmann::json;
+
+template<typename Dispatcher>
+void dispatch_json_value(Dispatcher& dispatcher, const std::string& command, const json& value) {
+  if (value.is_number_integer()) {
+      dispatcher.dispatch(command, value.get<int>());
+  } else if (value.is_number_float()) {
+      dispatcher.dispatch(command, value.get<double>());
+  } else if (value.is_boolean()) {
+      dispatcher.dispatch(command, value.get<bool>());
+  } else if (value.is_string()) {
+      dispatcher.dispatch(command, value.get<std::string>());
+  } else {
+      dispatcher.dispatch(command, value);
+  }
+}
+
 int main() {
     stdio_init_all();
 
@@ -27,10 +44,19 @@ int main() {
         if(input_handler.handle(c, json)){ 
           std::cerr << json.dump(4) << std::endl;
           std::string top_command = json.begin().key();
-          auto value = json[top_command];
-          dispatcher.dispatch(top_command, value);
+          dispatch_json_value(dispatcher,top_command, json[top_command]);
+          // auto value = json[top_command];
+          
+          // if(value.is_number_integer()){
+          //   auto v = value.get<int>();
+          //   dispatcher.dispatch(top_command, v);
+          // }else{
+          //   dispatcher.dispatch(top_command, value);
+          // }
+          
         }
       }
     }
     return 0;
 }
+

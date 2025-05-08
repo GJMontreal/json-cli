@@ -18,18 +18,18 @@ public:
   void execute(const nlohmann::json json) const;
 };
 
-class GreetCommand : public Command<GreetCommand, nlohmann::json> {
+class GreetCommand : public Command<GreetCommand, std::string> {
 public:
   static constexpr const char *name = "greet";
 
-  void execute(const nlohmann::json arg) const;
+  void execute(const std::string& arg) const;
 };
 
-class AnotherCommand : public Command<AnotherCommand, nlohmann::json> {
+class AnotherCommand : public Command<AnotherCommand, int> {
 public:
   static constexpr const char *name = "test";
 
-  void execute(const nlohmann::json arg) const { std::cout << "test, " << arg << "!\n"; }
+  void execute(const int& arg) const { std::cout << "test, " << arg << "!\n"; }
 };
 
 #endif
