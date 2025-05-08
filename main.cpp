@@ -14,9 +14,11 @@ int main() {
 
     std::cout << "initializing cli" << std::endl;
 
+
     CommandDispatcher<GreetCommand,HelpCommand,AnotherCommand> dispatcher;
     InputHandler input_handler;
 
+    
     while(1){
       char c = getchar_timeout_us(0);
       if(c != char(PICO_ERROR_TIMEOUT)){
