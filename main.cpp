@@ -3,6 +3,7 @@
 #include <pico/error.h>
 #include <stdio.h>
 #include <iostream>
+#include <nlohmann/json.hpp>
 
 #include "InputHandler.h"
 
@@ -16,7 +17,12 @@ int main() {
     while(1){
       char c = getchar_timeout_us(0);
       if(c != char(PICO_ERROR_TIMEOUT)){
-        input_handler.handle(c);  
+        nlohmann::json json;
+        
+        input_handler.handle(c, json);  
+        if(!json.empty()){
+          std::cout << "Parsed JSON: \n" << json.dump(4) << std::endl;
+        }
       }
     }
     return 0;

@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <sstream>
+#include <nlohmann/json.hpp>
 
 class InputHandler {
   public:
@@ -10,7 +11,8 @@ class InputHandler {
           return _brace_count;
         }
   
-    void handle(char c);
+        void handle(char c, nlohmann::json &json );
+        
     private:
       std::atomic<int> _brace_count = 0;
       bool started = false;
