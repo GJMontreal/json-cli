@@ -29,10 +29,12 @@ void dispatch_json_value(Dispatcher& dispatcher, const std::string& command, con
 int main() {
     stdio_init_all();
 
-    std::cout << "initializing cli" << std::endl;
+    std::cout << "Initializing CLI" << std::endl;
 
+    GreetCommand greet("hello");
+    HelpCommand help;
 
-    CommandDispatcher<GreetCommand,HelpCommand,AnotherCommand> dispatcher;
+    CommandDispatcher dispatcher(greet,help);
     InputHandler input_handler;
 
     
@@ -44,16 +46,7 @@ int main() {
         if(input_handler.handle(c, json)){ 
           std::cerr << json.dump(4) << std::endl;
           std::string top_command = json.begin().key();
-          dispatch_json_value(dispatcher,top_command, json[top_command]);
-          // auto value = json[top_command];
-          
-          // if(value.is_number_integer()){
-          //   auto v = value.get<int>();
-          //   dispatcher.dispatch(top_command, v);
-          // }else{
-          //   dispatcher.dispatch(top_command, value);
-          // }
-          
+          dispatch_json_value(dispatcher,top_command, json[top_command]);          
         }
       }
     }

@@ -14,7 +14,7 @@ using CommandArg = std::variant<std::string, int, nlohmann::json>;
 template<typename... Commands>
 class CommandDispatcher {
   public:
-      CommandDispatcher(): commands_{} {}
+      CommandDispatcher(Commands...cmds): commands_(std::move(cmds)...) {}
 
       void dispatch(const std::string& cmd_name, const CommandArg& arg) const {
         std::apply([&](const auto&... commands){

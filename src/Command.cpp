@@ -7,5 +7,5 @@ void HelpCommand::execute(const nlohmann::json json) const  {
 }
 
 void GreetCommand::execute(const std::string &name) const {
-  std::cout << "Hello, " << name << "!\n";
+  std::cout << this->context() << name << "!\n";
 }
