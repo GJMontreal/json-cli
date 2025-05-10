@@ -9,6 +9,14 @@
 #include <iostream>
 #include <utility>
 
+#define DEFINE_SELF_REFERENTIAL_DISPATCHER(name, ...)                        \
+    struct name;                                                             \
+    using name##Commands = CommandDispatcher<__VA_ARGS__, ListCommandsCommand<name>>; \
+    class name : public name##Commands {                                     \
+    public:                                                                   \
+        using name##Commands::name##Commands;                                \
+    };
+
 using CommandArg = std::variant<std::string, int, nlohmann::json>;
 
 template<typename... Commands>
@@ -17,10 +25,20 @@ class CommandDispatcher {
       CommandDispatcher(Commands...cmds): commands_(std::move(cmds)...) {}
 
       void dispatch(const std::string& cmd_name, const CommandArg& arg) const {
+        bool matched = false;
+
         std::apply([&](const auto&... commands){
-        (..., try_execute(commands, cmd_name, arg));}, commands_);
+        (..., (matched = matched || try_execute(commands, cmd_name, arg)));}, commands_);
+
+        if (!matched) {
+          std::cerr << "No command matched: \"" << cmd_name << "\"\n";
+      }
     }
   
+    std::tuple<Commands...>& get_commands() {
+      return commands_;
+    }
+
       void dispatch(const std::string& name, const char* cstr) const {
         dispatch(name, std::string(cstr));
     }
@@ -28,12 +46,12 @@ class CommandDispatcher {
       std::tuple<Commands...> commands_;
 
       template <typename Cmd>
-      static void try_execute(const Cmd& cmd, const std::string& name, const CommandArg& arg)
+      static bool try_execute(const Cmd& cmd, const std::string& name, const CommandArg& arg)
        {
           using ExpectedType = typename Cmd::ArgType;
 
           if (name != Cmd::name) {
-            return;
+            return false;
           }
 
           if (auto* actual = std::get_if<ExpectedType>(&arg)) {
@@ -41,6 +59,7 @@ class CommandDispatcher {
         } else {
             std::cerr << "Type mismatch for command '" << name << "'\n";
         }
+        return true;
       }
 
   };

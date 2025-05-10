@@ -1,4 +1,5 @@
 
+#include "Command.h"
 #include "pico/stdlib.h"
 #include <pico/error.h>
 #include <stdio.h>
@@ -29,12 +30,20 @@ void dispatch_json_value(Dispatcher& dispatcher, const std::string& command, con
 int main() {
     stdio_init_all();
 
+    DEFINE_SELF_REFERENTIAL_DISPATCHER(MyCLI, GreetCommand, DebugCommand)
+    
     std::cout << "Initializing CLI" << std::endl;
+    auto config = std::make_shared<DebugConfiguration>(DebugConfiguration{false,false});
 
-    GreetCommand greet("hello");
-    HelpCommand help;
+    DebugCommand debug({config});
+    GreetCommand greet("Bienvenue ");
+    ListCommandsCommand<MyCLI> help;
 
-    CommandDispatcher dispatcher(greet,help);
+    MyCLI dispatcher(greet,debug,help);
+
+    auto& command = std::get<ListCommandsCommand<MyCLI>>(dispatcher.get_commands());
+    command.set_context(std::ref(dispatcher));
+    
     InputHandler input_handler;
 
     
@@ -44,9 +53,14 @@ int main() {
         nlohmann::json json;
 
         if(input_handler.handle(c, json)){ 
-          std::cerr << json.dump(4) << std::endl;
+          if(config->echo){
+            std::cerr << json.dump(4) << std::endl;
+          }
           std::string top_command = json.begin().key();
-          dispatch_json_value(dispatcher,top_command, json[top_command]);          
+          // dispatch_json_value(dispatcher,top_command, json[top_command]); 
+          if(config->verbose){
+            std::cout << "debug " << config->verbose << std::endl;
+          }         
         }
       }
     }
