@@ -22,7 +22,7 @@ public:
   }
 
   void set_context(Context new_context) { context_ = std::move(new_context); }
-  
+
 protected:
   const Context &context() const { return context_; }
   Context &context() { return context_; }
@@ -69,18 +69,18 @@ public:
 
 template <typename Dispatcher>
 class ListCommandsCommand
-    : public Command<ListCommandsCommand<Dispatcher>, std::monostate,
+    : public Command<ListCommandsCommand<Dispatcher>, nlohmann::json,
                      std::optional<std::reference_wrapper<Dispatcher>>> {
 public:
   static constexpr const char *name = "help";
   static constexpr const char *description = "Lists available commands";
 
-  using Base = Command<ListCommandsCommand<Dispatcher>, std::monostate,
+  using Base = Command<ListCommandsCommand<Dispatcher>, nlohmann::json,
                        std::optional<std::reference_wrapper<Dispatcher>>>;
   using Base::Base;
 
-  void execute(const std::monostate &) const {
-    auto &dispatcher = this->context().get();
+  void execute(const nlohmann::json &) const {
+    auto &dispatcher = this->context().value().get();
 
     std::apply(
         [](const auto &...cmds) {

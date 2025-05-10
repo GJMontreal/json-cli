@@ -17,7 +17,7 @@
         using name##Commands::name##Commands;                                \
     };
 
-using CommandArg = std::variant<std::string, int, nlohmann::json>;
+using CommandArg = std::variant<std::monostate,std::string, int, nlohmann::json>;
 
 template<typename... Commands>
 class CommandDispatcher {

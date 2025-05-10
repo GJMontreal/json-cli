@@ -43,9 +43,8 @@ int main() {
 
     auto& command = std::get<ListCommandsCommand<MyCLI>>(dispatcher.get_commands());
     command.set_context(std::ref(dispatcher));
-    
-    InputHandler input_handler;
 
+    InputHandler input_handler;
     
     while(1){
       char c = getchar_timeout_us(0);
@@ -57,7 +56,8 @@ int main() {
             std::cerr << json.dump(4) << std::endl;
           }
           std::string top_command = json.begin().key();
-          // dispatch_json_value(dispatcher,top_command, json[top_command]); 
+          dispatch_json_value(dispatcher,top_command, json[top_command]); 
+          // dispatcher.dispatch(top_command, json[top_command]);
           if(config->verbose){
             std::cout << "debug " << config->verbose << std::endl;
           }         
