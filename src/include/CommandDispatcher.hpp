@@ -9,6 +9,9 @@
 #include <iostream>
 #include <utility>
 
+// Simplify the creation of our CRTP 
+// pass in the command class names wanted
+// It will append a ListCommandsCommand
 #define DEFINE_SELF_REFERENTIAL_DISPATCHER(name, ...)                        \
     struct name;                                                             \
     using name##Commands = CommandDispatcher<__VA_ARGS__, ListCommandsCommand<name>>; \
@@ -21,21 +24,25 @@ using CommandArg = std::variant<std::monostate,std::string, int, nlohmann::json>
 
 template<typename... Commands>
 class CommandDispatcher {
-  public:
-      CommandDispatcher(Commands...cmds): commands_(std::move(cmds)...) {}
+public:
+  CommandDispatcher(std::reference_wrapper<Commands>... cmds)
+      : commands_(cmds...) {}
 
-      void dispatch(const std::string& cmd_name, const CommandArg& arg) const {
-        bool matched = false;
+  void dispatch(const std::string &cmd_name, const CommandArg &arg) const {
+    bool matched = false;
 
-        std::apply([&](const auto&... commands){
-        (..., (matched = matched || try_execute(commands, cmd_name, arg)));}, commands_);
+    std::apply(
+        [&](const auto &...commands) {
+          (..., (matched = matched || try_execute(commands.get(), cmd_name, arg)));
+        },
+        commands_);
 
-        if (!matched) {
-          std::cerr << "No command matched: \"" << cmd_name << "\"\n";
-      }
+    if (!matched) {
+      std::cerr << "No command matched: \"" << cmd_name << "\"\n";
+    }
     }
   
-    std::tuple<Commands...>& get_commands() {
+    std::tuple<std::reference_wrapper<Commands>...>& get_commands() {
       return commands_;
     }
 
@@ -43,7 +50,7 @@ class CommandDispatcher {
         dispatch(name, std::string(cstr));
     }
   private:
-      std::tuple<Commands...> commands_;
+      std::tuple<std::reference_wrapper<Commands>...> commands_;
 
       template <typename Cmd>
       static bool try_execute(const Cmd& cmd, const std::string& name, const CommandArg& arg)

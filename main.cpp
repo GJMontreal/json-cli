@@ -27,12 +27,15 @@ void dispatch_json_value(Dispatcher& dispatcher, const std::string& command, con
   }
 }
 
+// using ConcreteDispatcher = CommandDispatcher<GreetCommand, DebugCommand>;
+
 int main() {
     stdio_init_all();
+        
+    std::cout << "Initializing CLI" << std::endl;
 
     DEFINE_SELF_REFERENTIAL_DISPATCHER(MyCLI, GreetCommand, DebugCommand)
-    
-    std::cout << "Initializing CLI" << std::endl;
+
     auto config = std::make_shared<DebugConfiguration>(DebugConfiguration{false,false});
 
     DebugCommand debug({config});
@@ -40,9 +43,7 @@ int main() {
     ListCommandsCommand<MyCLI> help;
 
     MyCLI dispatcher(greet,debug,help);
-
-    auto& command = std::get<ListCommandsCommand<MyCLI>>(dispatcher.get_commands());
-    command.set_context(std::ref(dispatcher));
+    help.set_context(std::ref(dispatcher));
 
     InputHandler input_handler;
     
@@ -57,7 +58,6 @@ int main() {
           }
           std::string top_command = json.begin().key();
           dispatch_json_value(dispatcher,top_command, json[top_command]); 
-          // dispatcher.dispatch(top_command, json[top_command]);
           if(config->verbose){
             std::cout << "debug " << config->verbose << std::endl;
           }         

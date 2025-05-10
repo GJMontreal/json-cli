@@ -27,7 +27,7 @@ protected:
   const Context &context() const { return context_; }
   Context &context() { return context_; }
 
-
+// this could be a shared pointer
 private:
   mutable Context context_;
 };
@@ -83,9 +83,9 @@ public:
     auto &dispatcher = this->context().value().get();
 
     std::apply(
-        [](const auto &...cmds) {
-          ((std::cout << "- " << std::decay_t<decltype(cmds)>::name << ": "
-                      << std::decay_t<decltype(cmds)>::description << "\n"),
+        [](const auto &...refs) {
+          ((std::cout << "- " << std::decay_t<decltype(refs.get())>::name << ": "
+                      << std::decay_t<decltype(refs.get())>::description << "\n"),
            ...);
         },
         dispatcher.get_commands());
