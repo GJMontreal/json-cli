@@ -25,15 +25,15 @@ using CommandArg = std::variant<std::monostate,std::string, int, nlohmann::json>
 template<typename... Commands>
 class CommandDispatcher {
 public:
-  CommandDispatcher(std::reference_wrapper<Commands>... cmds)
+  CommandDispatcher(std::shared_ptr<Commands>... cmds)
       : commands_(cmds...) {}
 
   void dispatch(const std::string &cmd_name, const CommandArg &arg) const {
     bool matched = false;
 
     std::apply(
-        [&](const auto &...commands) {
-          (..., (matched = matched || try_execute(commands.get(), cmd_name, arg)));
+        [&](const auto &...command) {
+          (..., (matched = matched || try_execute(*command, cmd_name, arg)));
         },
         commands_);
 
@@ -42,15 +42,15 @@ public:
     }
     }
   
-    std::tuple<std::reference_wrapper<Commands>...>& get_commands() {
+    std::tuple<std::shared_ptr<Commands>...>& get_commands() {
       return commands_;
     }
-
+//is this next even used?
       void dispatch(const std::string& name, const char* cstr) const {
         dispatch(name, std::string(cstr));
     }
   private:
-      std::tuple<std::reference_wrapper<Commands>...> commands_;
+      std::tuple<std::shared_ptr<Commands>...> commands_;
 
       template <typename Cmd>
       static bool try_execute(const Cmd& cmd, const std::string& name, const CommandArg& arg)

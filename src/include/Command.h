@@ -70,25 +70,29 @@ public:
 template <typename Dispatcher>
 class ListCommandsCommand
     : public Command<ListCommandsCommand<Dispatcher>, nlohmann::json,
-                     std::optional<std::reference_wrapper<Dispatcher>>> {
+                     std::optional<std::weak_ptr<Dispatcher>>> {
 public:
   static constexpr const char *name = "help";
   static constexpr const char *description = "Lists available commands";
 
   using Base = Command<ListCommandsCommand<Dispatcher>, nlohmann::json,
-                       std::optional<std::reference_wrapper<Dispatcher>>>;
+                       std::optional<std::weak_ptr<Dispatcher>>>;
   using Base::Base;
 
   void execute(const nlohmann::json &) const {
-    auto &dispatcher = this->context().value().get();
-
-    std::apply(
-        [](const auto &...refs) {
-          ((std::cout << "- " << std::decay_t<decltype(refs.get())>::name << ": "
-                      << std::decay_t<decltype(refs.get())>::description << "\n"),
-           ...);
-        },
-        dispatcher.get_commands());
+    
+    if( auto dispatcher = this->context()->lock() ){
+      std::cout << "Available commands:\n";
+      std::apply(
+          [](const auto &...cmd) {
+            ((std::cout << "- " << std::decay_t<decltype(*cmd)>::name << ": "
+                        << std::decay_t<decltype(*cmd)>::description << "\n"),
+             ...);
+          },
+          dispatcher->get_commands());
+    } else {
+      std::cerr << "Dispatcher context is no longer valid.\n";
+    }
   }
 };
 
